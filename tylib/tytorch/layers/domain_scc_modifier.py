@@ -90,7 +90,7 @@ def clear_inputs_se(net:torch.nn.Module, inp, out):
         if m.__class_name__ == 'DCConv2d':
             m.inputs_se = None
 
-def Conv2DScc(net:nn.Module, num=4):
+def Conv2DScc(net:nn.Module, num=4, in_num=2048):
 
     dic = dict(net.named_modules())
     for name, m in dic.items():
@@ -98,7 +98,7 @@ def Conv2DScc(net:nn.Module, num=4):
             # print(num, m.in_channels, m.out_channels,
             #                    m.kernel_size, m.stride, m.padding,
             #                    m.dilation, m.groups, m.bias)
-            scc_conv = DCConv2d(num, m.in_channels, m.out_channels,
+            scc_conv = DCConv2d(in_num, num, m.in_channels, m.out_channels,
                                m.kernel_size[0], m.stride[0], m.padding[0],
                                m.dilation[0], m.groups, m.bias)
             #print('cc')

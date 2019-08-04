@@ -30,7 +30,7 @@ class DCConv2d(nn.Module):
     def _initialize_weights(self):
         for name, m in self.named_modules():
 
-            if isinstance(m, CConv2d):
+            if isinstance(m, DCConv2d):
                 c, h, w = m.in_channels, m.kernel_size, m.kernel_size
                 nn.init.normal_(m.weight, 0, math.sqrt(1.0 / (c * h * w)))
                 if m.bias is not None:
@@ -80,14 +80,18 @@ class DCConv2d(nn.Module):
 
 
 def get_inputs_se(net:torch.nn.Module, inputs):
-    embedding_vec = inputs[-1]
+    #embedding_vec = inputs[-1]
+    embedding_vec = net.embedding_vec
+    #print(type(inputs), len(inputs), embedding_vec)
     for m in net.modules():
-        if m.__class_name__ == 'DCConv2d':
+        #if m.__class_name__ == 'DCConv2d':
+        if isinstance(m, DCConv2d):
             m.inputs_se = F.sigmoid(m.routing_fc(embedding_vec))
 
 def clear_inputs_se(net:torch.nn.Module, inp, out):
     for m in net.modules():
-        if m.__class_name__ == 'DCConv2d':
+        #if m.__class_name__ == 'DCConv2d':
+        if isinstance(m, DCConv2d):
             m.inputs_se = None
 
 def Conv2DScc(net:nn.Module, num=4, in_num=2048):

@@ -30,7 +30,7 @@ class DCConv2d(nn.Module):
     def _initialize_weights(self):
         for name, m in self.named_modules():
 
-            if isinstance(m, CConv2d):
+            if isinstance(m, DCConv2d):
                 c, h, w = m.in_channels, m.kernel_size, m.kernel_size
                 nn.init.normal_(m.weight, 0, math.sqrt(1.0 / (c * h * w)))
                 if m.bias is not None:

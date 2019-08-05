@@ -49,33 +49,24 @@ class CConv2d(nn.Module):
         '''
         if inputs.shape[-1] == 7:
             print('inputs_se:', inputs_se)
-        batchsize, channel, height, width = inputs.shape
-        weight = F.linear(inputs_se, self.weight)
-        weight = weight.reshape(batchsize * self.out_channels, self.in_channels // self.groups, self.kernel_size, self.kernel_size)
-        inputs = inputs.reshape(1, batchsize * channel, height, width)
-        outputs = F.conv2d(inputs, weight, None, self.stride, self.padding, self.dilation, groups=self.groups * batchsize)
-        height, width = outputs.shape[2:]
-        outputs = outputs.reshape(batchsize, self.out_channels, height, width)
-        if self.bias is not None:
-            outputs = outputs + self.bias.reshape(1, -1, 1, 1)
+
         '''
         x = inputs
         inputs_se = x.reshape(x.shape[0], x.shape[1], -1).mean(dim=-1, keepdim=False)
         inputs_se = F.sigmoid(self.routing_fc(inputs_se))
-        # the code below is equal to the above, but faster actually
-        #if inputs.shape[-1] == 7:
-        #    print('inputs_se:', inputs_se)
+
         batchsize, channel, height, width = inputs.shape
-        weight = self.weight.reshape(self.out_channels, self.in_channels // self.groups, self.kernel_size, self.kernel_size, self.num)
-        weight = weight.permute(0, 4, 1, 2, 3)
-        weight = weight.reshape(self.out_channels * self.num, self.in_channels // self.groups, self.kernel_size, self.kernel_size)
-        outputs = F.conv2d(inputs, weight, None, self.stride, self.padding, self.dilation, groups=self.groups)
-        outputs = outputs.reshape(outputs.shape[0], outputs.shape[1] // self.num, self.num, outputs.shape[2], outputs.shape[3])
-        outputs = outputs * inputs_se.reshape(inputs_se.shape[0], 1, inputs_se.shape[1], 1, 1)
-        outputs = outputs.sum(dim=2, keepdim=False)
-        #print('aaa')
+        weight = F.linear(inputs_se, self.weight)
+        weight = weight.reshape(batchsize * self.out_channels, self.in_channels // self.groups, self.kernel_size,
+                                self.kernel_size)
+        inputs = inputs.reshape(1, batchsize * channel, height, width)
+        outputs = F.conv2d(inputs, weight, None, self.stride, self.padding, self.dilation,
+                           groups=self.groups * batchsize)
+        height, width = outputs.shape[2:]
+        outputs = outputs.reshape(batchsize, self.out_channels, height, width)
         if self.bias is not None:
             outputs = outputs + self.bias.reshape(1, -1, 1, 1)
+        
         return outputs
 
 def Conv2Scc(net:nn.Module, num=4):

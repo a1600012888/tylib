@@ -50,11 +50,34 @@ def BN2AdaBN(net:nn.Module, num_domain=4):
     return net
 
 
+class adabn_hook(object):
+
+    def __init__(self, resolutions=[96, 160, 224]):
+        self.resolutions = resolutions
+        self.num_domain = len(self.resolutions)
+
+    def __call__(self, module, inputs):
+        input = inputs[0]
+        #print(input)
+        n,c,h,w = input.shape
+        #print(h)
+        domain_idx = self.resolutions.index(h)
+
+        for name, m in module.named_modules():
+            if isinstance(m, AdaBN):
+                m.select_bn(domain_idx)
+
 def test_adabn():
     import torchvision
     net = torchvision.models.resnet50(pretrained=False)
     net = BN2AdaBN(net)
+    hook = adabn_hook(resolutions=[96, 160, 224])
+    _ = net.register_forward_pre_hook(hook)
     print(net)
+    inp = torch.ones((1,3,224,224))
+    print(inp.shape)
+    out = net(inp)
+    print(out.shape)
 
 if __name__ == "__main__":
     test_adabn()

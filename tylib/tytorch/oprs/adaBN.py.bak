@@ -16,17 +16,18 @@ class AdaBN(nn.Module):
 
             self.BN_buffer.append(bn)
 
-        self.bn_pointer = 0
+        self.bn = self.BN_buffer[0]
+
     def forward(self, *input):
-        out = self.BN_buffer[self.bn_pointer](*input)
+        out = self.bn(*input)
         return out
 
     def select_bn(self, idx:int):
-        self.bn_pointer = idx
+        self.bn = self.BN_buffer[idx]
 
 
 
-def BN2AdaBN(net:nn.Module, num_domain=3):
+def BN2AdaBN(net:nn.Module, num_domain=4):
     import copy
     #dic = copy.deepcopy(dict(net.named_modules()))
     dic = dict(net.named_modules())

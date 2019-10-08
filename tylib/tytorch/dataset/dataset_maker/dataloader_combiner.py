@@ -11,28 +11,30 @@ class _DataloaderCombiner(object):
     '''
 
     def __init__(self, loaders):
-        
+
         self.loaders = []
         for loader in loaders:
             self.loaders.append(enumerate(loader))
         #self.loaders = loaders
         self.num_loader = len(loaders)
         self.lens = [len(loader) for loader in loaders]
-        total_len = 0 
+        total_len = 0
         for l in self.lens:
             total_len += l
         self.total_len = total_len
+        self.start_idx = 0
 
 
     def __next__(self):
 
-        idx = int(torch.randint(low=0, high=self.num_loader, size=(1,))[0])
+        idx = self.start_idx % 3
+        self.start_idx += 1
         loader = self.loaders[idx]
 
         i, batch = next(loader)
-        #print(i)
+        #print(i, idx)
         #print(self.lens)
-        
+
         if i == self.lens[idx]-1:
             self.loader.pop(idx)
             self.num_loader -= 1
@@ -48,10 +50,10 @@ class DataloaderCombiner(object):
     '''
 
     def __init__(self, loaders):
-        
+
         self.num_loader = len(loaders)
         self.lens = [len(loader) for loader in loaders]
-        total_len = 0 
+        total_len = 0
         for l in self.lens:
             total_len += l
         self.total_len = total_len

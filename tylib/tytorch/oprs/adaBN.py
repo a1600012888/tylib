@@ -60,7 +60,13 @@ class adabn_hook(object):
         #print(input)
         n,c,h,w = input.shape
         #print(h)
-        domain_idx = self.resolutions.index(h)
+        domain_idx = len(self.resolutions) - 1
+        for i in range(len(self.resolutions)):
+            res = self.resolutions[i]
+            if res >= h:
+                domain_idx = i
+
+        #domain_idx = self.resolutions.index(h)
 
         for name, m in module.named_modules():
             if isinstance(m, AdaBN):
